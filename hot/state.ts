@@ -1,0 +1,116 @@
+import * as NodeFS from "node:fs";
+import * as NodePath from "node:path";
+import { type ModuleNamespace } from "../util/types.ts";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+export type ModuleAcceptor = [
+  string,
+  (mod: ModuleNamespace | undefined) => void | Promise<void>,
+];
+
+export interface ModuleInfo {
+  ts: number | undefined;
+  dependents: Set<string>;
+  acceptors: ModuleAcceptor[];
+}
+
+const modules = new Map<string, ModuleInfo>();
+const watchers = new Map<string, NodeFS.FSWatcher>();
+
+let watchChangedModules = new Set<string>();
+const watchChangedModulesTimer = setTimeout(onWatchSettled, 50);
+
+export function ensureModuleInfo(url: string): ModuleInfo {
+  let info = modules.get(url);
+  if (!info) {
+    info = { ts: undefined, dependents: new Set(), acceptors: [] };
+    modules.set(url, info);
+
+    if (url.startsWith("file://") && !url.includes("/node_modules/")) {
+      const dir = NodePath.dirname(fileURLToPath(url));
+      if (!watchers.has(dir)) {
+        watchers.set(
+          dir,
+          NodeFS.watch(dir, (type, name) => onWatchChanged(dir, type, name)),
+        );
+      }
+    }
+  }
+  return info;
+}
+
+export function getModuleInfo(url: string): ModuleInfo | undefined {
+  return modules.get(url);
+}
+
+function onWatchChanged(dir: string, type: string, name: string | null): void {
+  if (name) {
+    const url = pathToFileURL(NodePath.resolve(dir, name)).href;
+    if (modules.has(url)) {
+      watchChangedModules.add(url);
+      watchChangedModulesTimer.refresh();
+    }
+  }
+}
+
+async function onWatchSettled() {
+  // TODO: This function must complete before being started again.
+
+  const urls = watchChangedModules;
+  watchChangedModules = new Set();
+
+  const now = Date.now();
+  let unhandledUpdate = false;
+
+  for (const url of urls) {
+    const info = getModuleInfo(url);
+    if (info) {
+      info.ts = now;
+      if (!info.dependents.size) {
+        unhandledUpdate = true;
+      }
+
+      let updated = await import(url).catch((err) => {
+        // TODO: Better error reporting.
+        console.error(err);
+        return undefined;
+      });
+      for (const parentURL of info.dependents) {
+        const parentInfo = getModuleInfo(parentURL);
+        let accepted = false;
+        if (parentInfo) {
+          for (const acceptor of parentInfo.acceptors) {
+            if (acceptor[0] === url) {
+              try {
+                await acceptor[1](updated);
+                accepted = true;
+              } catch (err) {
+                // TODO: Better error reporting.
+                console.error(err);
+              }
+            }
+          }
+        }
+        if (!accepted) {
+          urls.add(parentURL);
+        }
+      }
+    }
+  }
+
+  if (unhandledUpdate) {
+    // TODO: Can we shut this down more delicately to flush files/other logs?
+    function doShutdown() {
+      process.exit(0);
+    }
+
+    if (!process.send) {
+      process.stderr.write(
+        "[Candle] Restart required by code changes\n",
+        doShutdown,
+      );
+    } else {
+      process.send("hot:reload", doShutdown);
+    }
+  }
+}

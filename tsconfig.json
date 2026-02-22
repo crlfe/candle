@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "exclude": ["**/dist", "**/node_modules"]
+}
