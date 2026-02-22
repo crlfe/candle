@@ -1,4 +1,4 @@
-import { createHot } from "../../hot/index.ts";
+import { createHot } from "candle/hot";
 
 async function main() {
   const hot = createHot(import.meta);
