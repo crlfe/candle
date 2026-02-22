@@ -16,13 +16,13 @@ pnpm i
 node ./examples/hot-import/index.ts
 ```
 
-Then modify the 'bar.ts', 'foo.ts', or 'greet.ts' files. As soon as you save
-a change the 'hot.import' in 'index.ts' will be updated, and the new message
+Then modify the `bar.ts`, `foo.ts`, or `greet.ts` files. As soon as you save
+a change the `hot.import` in `index.ts` will be updated, and the new message
 will be printed.
 
 The same technique can be used to instantly update configuration files,
 plugins, or parts of an application during development. I intend to use code
-rewrites to provide 'import.meta.hot', so code deeper in the application can
+rewrites to provide `import.meta.hot`, so code deeper in the application can
 do fine-grained reloads that simply vanish from the release bundle.
 
 ## License and Warranty Disclaimer
