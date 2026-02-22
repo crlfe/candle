@@ -1,4 +1,4 @@
-= Candle
+# Candle
 
 Candle is a collection of utilities and libraries for quickly and easily
 building small, mostly self-contained, websites, webapps, and web games.
@@ -8,7 +8,7 @@ because it will likely break in unexpected ways at the worst time. It is
 released mostly so that I have something to point people at when I'm rambling
 about concepts and prototypes.
 
-== Hot Reloading
+## Hot Reloading
 
 Run the example (tested with Node v24.11.0):
 ```
@@ -25,7 +25,7 @@ plugins, or parts of an application during development. I intend to use code
 rewrites to provide 'import.meta.hot', so code deeper in the application can
 do fine-grained reloads that simply vanish from the release bundle.
 
-== License and Warranty Disclaimer
+## License and Warranty Disclaimer
 
     Copyright 2026 Chris Wolfe (https://crlfe.ca/)
 
