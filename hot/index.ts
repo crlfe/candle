@@ -29,28 +29,39 @@ class HotImpl implements Hot {
   }
 
   import(specifier: string): AsyncIterable<ModuleNamespace | undefined> {
+    type ImportIteratorResult = IteratorResult<ModuleNamespace | undefined>;
+
     const resolved = this.#meta.resolve(specifier);
-    let latest: Promise<ModuleNamespace | undefined> = import(resolved).catch(
+
+    // The initial import or most recent update. This is the first item
+    // returned by a newly-created iterator, so callers will have a valid
+    // module as quickly as possible.
+    let lastUpdate: Promise<ImportIteratorResult> = import(resolved).then(
+      (mod) => ({ done: false, value: mod }),
       (err) => {
         // TODO: Better error reporting.
-        console.error(err);
-        return undefined;
+        console.error(err.message);
+        return { done: false, value: undefined };
       },
     );
-    let future = Promise.withResolvers<ModuleNamespace | undefined>();
+
+    // Will be resolved by the next module update.
+    let future = Promise.withResolvers<ImportIteratorResult>();
+
     this.accept(resolved, (mod) => {
-      future.resolve(mod);
-      future = Promise.withResolvers<ModuleNamespace | undefined>();
+      future.resolve({ done: false, value: mod });
+      lastUpdate = future.promise;
+      future = Promise.withResolvers();
     });
 
     return {
       [Symbol.asyncIterator]() {
-        let promise: Promise<ModuleNamespace | undefined> = latest;
+        let promise = lastUpdate;
         return {
           async next() {
-            let value = await promise;
+            let result = await promise;
             promise = future.promise;
-            return { done: false, value };
+            return result;
           },
         };
       },

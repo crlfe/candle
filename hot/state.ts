@@ -1,6 +1,6 @@
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
-import { type ModuleNamespace } from "../util/types.ts";
+import { isObjectWith, type ModuleNamespace } from "../util/types.ts";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 export type ModuleAcceptor = [
@@ -72,7 +72,7 @@ async function onWatchSettled() {
 
       let updated = await import(url).catch((err) => {
         // TODO: Better error reporting.
-        console.error(err);
+        console.error(err.message);
         return undefined;
       });
       for (const parentURL of info.dependents) {
@@ -86,7 +86,7 @@ async function onWatchSettled() {
                 accepted = true;
               } catch (err) {
                 // TODO: Better error reporting.
-                console.error(err);
+                console.error(isObjectWith(err, "message") ? err.message : err);
               }
             }
           }

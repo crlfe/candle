@@ -1,6 +1,11 @@
-import { registerHooks, type RegisterHooksOptions } from "node:module";
-import { ensureModuleInfo, getModuleInfo } from "./state.ts";
+import {
+  registerHooks,
+  type RegisterHooksOptions,
+  type ResolveFnOutput,
+} from "node:module";
+import { isObjectWith } from "../util/types.ts";
 import { urlSplitSearch } from "../util/urls.ts";
+import { ensureModuleInfo, getModuleInfo } from "./state.ts";
 
 // Ignore everything in the candle/hot directory.
 const IGNORE_URL_PREFIX = import.meta.url.replace(/\/[^/]*$/, "/");
@@ -9,7 +14,30 @@ const TS_PARAM = "ts";
 
 const hotHooks: RegisterHooksOptions = {
   resolve(specifier, context, next) {
-    const resolved = next(specifier, context);
+    if (!/^file:\/\/|^\.{0,2}(?:[/\\]|$)|/.test(specifier)) {
+      // Ignore anything that does not look like a local file url/path.
+      // TODO: Consider watching files in node_modules, especially if linked.
+      return next(specifier, context);
+    }
+
+    let resolved: ResolveFnOutput;
+    try {
+      resolved = next(specifier, context);
+    } catch (err) {
+      if (isObjectWith(err, "code") && err.code === "ERR_MODULE_NOT_FOUND") {
+        // Vite (and therefore Vitest) hooks unfortunately raise an error when
+        // the requested module is missing. To support easy unit testing, and
+        // in case anything else has the same somewhat-bug, do our own local
+        // resolution if later hooks throw ERR_MODULE_NOT_FOUND.
+        resolved = {
+          url: new URL(specifier, context.parentURL).href,
+          importAttributes: context.importAttributes,
+        };
+      } else {
+        throw err;
+      }
+    }
+
     const [id, search] = urlSplitSearch(resolved.url);
 
     if (context.parentURL && !context.parentURL.startsWith(IGNORE_URL_PREFIX)) {
@@ -28,6 +56,7 @@ const hotHooks: RegisterHooksOptions = {
     if (searchParams.size) {
       resolved.url += `?${searchParams}`;
     }
+
     return resolved;
   },
 };
