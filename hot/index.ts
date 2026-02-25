@@ -1,6 +1,7 @@
 import { type ModuleNamespace } from "../util/types.ts";
 import { ensureHotHooksRegistered } from "./hooks.ts";
 import { ensureModuleInfo } from "./state.ts";
+export { resetHot } from "./state.ts";
 
 export interface Hot {
   accept(
@@ -8,7 +9,7 @@ export interface Hot {
     callback: (mod: ModuleNamespace | undefined) => void | Promise<void>,
   ): void;
 
-  import(specifier: string): AsyncIterable<ModuleNamespace | undefined>;
+  import(specifier: string): AsyncIterableIterator<ModuleNamespace | undefined> & Disposable;
 }
 
 class HotImpl implements Hot {
@@ -28,7 +29,7 @@ class HotImpl implements Hot {
     ]);
   }
 
-  import(specifier: string): AsyncIterable<ModuleNamespace | undefined> {
+  import(specifier: string): AsyncIterableIterator<ModuleNamespace | undefined> & Disposable {
     type ImportIteratorResult = IteratorResult<ModuleNamespace | undefined>;
 
     const resolved = this.#meta.resolve(specifier);
@@ -36,7 +37,7 @@ class HotImpl implements Hot {
     // The initial import or most recent update. This is the first item
     // returned by a newly-created iterator, so callers will have a valid
     // module as quickly as possible.
-    let lastUpdate: Promise<ImportIteratorResult> = import(resolved).then(
+    let promise: Promise<ImportIteratorResult> = import(resolved).then(
       (mod) => ({ done: false, value: mod }),
       (err) => {
         // TODO: Better error reporting.
@@ -46,24 +47,31 @@ class HotImpl implements Hot {
     );
 
     // Will be resolved by the next module update.
-    let future = Promise.withResolvers<ImportIteratorResult>();
+    let nextUpdate = Promise.withResolvers<ImportIteratorResult>();
 
     this.accept(resolved, (mod) => {
-      future.resolve({ done: false, value: mod });
-      lastUpdate = future.promise;
-      future = Promise.withResolvers();
+      nextUpdate.resolve({ done: false, value: mod });
+      promise = nextUpdate.promise;
+      nextUpdate = Promise.withResolvers();
     });
 
     return {
       [Symbol.asyncIterator]() {
-        let promise = lastUpdate;
-        return {
-          async next() {
-            let result = await promise;
-            promise = future.promise;
-            return result;
-          },
-        };
+        return this;
+      },
+      async next() {
+        const result = await promise;
+        promise = nextUpdate.promise;
+        return result;
+      },
+      async return(value?: any) {
+        nextUpdate.resolve({ done: true, value });
+        promise = nextUpdate.promise;
+        return await promise;
+      },
+      async [Symbol.dispose]() {
+        nextUpdate.resolve({ done: true, value: undefined });
+        promise = nextUpdate.promise;
       },
     };
   }

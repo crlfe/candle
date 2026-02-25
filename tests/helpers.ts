@@ -1,12 +1,16 @@
+import * as chai from "chai";
+import chaiAsPromised from "chai-as-promised";
 import * as NodeFS from "node:fs";
 import * as NodeOS from "node:os";
 import * as NodePath from "node:path";
-import { test } from "vitest";
+import * as NodeTest from "node:test";
 
-export const testWithTempDir = test.extend<{ tempDir: string }>({
-  tempDir: async ({}, use) => {
-    const prefix = NodePath.join(NodeOS.tmpdir(), "vitest-candle-");
-    await using handle = await NodeFS.promises.mkdtempDisposable(prefix);
-    await use(handle.path);
-  },
-});
+export const { expect } = chai;
+export const { test } = NodeTest;
+
+chai.use(chaiAsPromised);
+
+export function createTempDir(): Promise<NodeFS.promises.DisposableTempDir> {
+  const prefix = NodePath.join(NodeOS.tmpdir(), "vitest-candle-");
+  return NodeFS.promises.mkdtempDisposable(prefix);
+}

@@ -11,6 +11,7 @@ about concepts and prototypes.
 ## Hot Reloading
 
 Run the example (tested with Node v24.11.0):
+
 ```
 pnpm i
 node ./examples/hot-import/index.ts

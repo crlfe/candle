@@ -1,8 +1,4 @@
-import {
-  registerHooks,
-  type RegisterHooksOptions,
-  type ResolveFnOutput,
-} from "node:module";
+import { registerHooks, type RegisterHooksOptions, type ResolveFnOutput } from "node:module";
 import { isObjectWith } from "../util/types.ts";
 import { urlSplitSearch } from "../util/urls.ts";
 import { ensureModuleInfo, getModuleInfo } from "./state.ts";
@@ -25,10 +21,10 @@ const hotHooks: RegisterHooksOptions = {
       resolved = next(specifier, context);
     } catch (err) {
       if (isObjectWith(err, "code") && err.code === "ERR_MODULE_NOT_FOUND") {
-        // Vite (and therefore Vitest) hooks unfortunately raise an error when
-        // the requested module is missing. To support easy unit testing, and
-        // in case anything else has the same somewhat-bug, do our own local
-        // resolution if later hooks throw ERR_MODULE_NOT_FOUND.
+        // TODO: Unfortunately later processing (sometimes?) raises an error
+        // when the requested module is missing. It would be nice to get back
+        // the URL that they actually tried to resolve, but for now fall back
+        // to doing a basic URL resolution ourselves.
         resolved = {
           url: new URL(specifier, context.parentURL).href,
           importAttributes: context.importAttributes,

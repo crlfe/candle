@@ -3,10 +3,7 @@ import * as NodePath from "node:path";
 import { isObjectWith, type ModuleNamespace } from "../util/types.ts";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-export type ModuleAcceptor = [
-  string,
-  (mod: ModuleNamespace | undefined) => void | Promise<void>,
-];
+export type ModuleAcceptor = [string, (mod: ModuleNamespace | undefined) => void | Promise<void>];
 
 export interface ModuleInfo {
   ts: number | undefined;
@@ -19,6 +16,15 @@ const watchers = new Map<string, NodeFS.FSWatcher>();
 
 let watchChangedModules = new Set<string>();
 const watchChangedModulesTimer = setTimeout(onWatchSettled, 50);
+
+export function resetHot() {
+  for (const watcher of watchers.values()) {
+    watcher.close();
+  }
+
+  modules.clear();
+  watchers.clear();
+}
 
 export function ensureModuleInfo(url: string): ModuleInfo {
   let info = modules.get(url);
@@ -105,10 +111,7 @@ async function onWatchSettled() {
     }
 
     if (!process.send) {
-      process.stderr.write(
-        "[Candle] Restart required by code changes\n",
-        doShutdown,
-      );
+      process.stderr.write("[Candle] Restart required by code changes\n", doShutdown);
     } else {
       process.send("hot:reload", doShutdown);
     }

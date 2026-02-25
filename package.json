@@ -1,8 +1,8 @@
 {
   "name": "candle",
   "version": "0.1.0",
-  "license": "MIT",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "exports": {
     "./hot": {
@@ -10,15 +10,18 @@
     }
   },
   "scripts": {
-    "lint": "oxlint",
-    "test": "vitest"
+    "lint": "oxlint && oxfmt --check",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "@types/chai": "^5.2.3",
+    "@types/chai-as-promised": "^8.0.2",
+    "@types/node": "^25.3.0",
+    "chai": "^6.2.2",
+    "chai-as-promised": "^8.0.2",
+    "oxfmt": "^0.34.0",
+    "oxlint": "^1.49.0"
   },
   "packageManager": "pnpm@10.30.1",
-  "minimumReleaseAge": 10080,
-  "devDependencies": {
-    "@types/node": "^25.3.0",
-    "oxfmt": "^0.34.0",
-    "oxlint": "^1.49.0",
-    "vitest": "^4.0.18"
-  }
+  "minimumReleaseAge": 10080
 }
