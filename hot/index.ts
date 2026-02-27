@@ -1,18 +1,24 @@
-import { type ModuleNamespace } from "../util/types.ts";
 import { ensureHotHooksRegistered } from "./hooks.ts";
 import { ensureModuleInfo } from "./state.ts";
 export { resetHot } from "./state.ts";
+import { type ModuleNamespace } from "../util/types.ts";
 
-export interface Hot {
-  accept(
-    specifier: string,
-    callback: (mod: ModuleNamespace | undefined) => void | Promise<void>,
-  ): void;
+declare global {
+  interface ImportMeta {
+    hot?: ImportMetaHot;
+  }
 
-  import(specifier: string): AsyncIterableIterator<ModuleNamespace | undefined> & Disposable;
+  interface ImportMetaHot {
+    accept(
+      specifier: string,
+      callback: (mod: ModuleNamespace | undefined) => void | Promise<void>,
+    ): void;
+
+    import(specifier: string): AsyncIterableIterator<ModuleNamespace | undefined> & Disposable;
+  }
 }
 
-class HotImpl implements Hot {
+class HotImpl implements ImportMetaHot {
   readonly #meta: ImportMeta;
 
   constructor(meta: ImportMeta) {
@@ -77,7 +83,7 @@ class HotImpl implements Hot {
   }
 }
 
-export function createHot(meta: ImportMeta): Hot {
+export function createHot(meta: ImportMeta): ImportMetaHot {
   ensureHotHooksRegistered();
   return new HotImpl(meta);
 }

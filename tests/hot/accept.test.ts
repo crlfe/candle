@@ -1,7 +1,6 @@
 import { createHot, resetHot } from "candle/hot";
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
-import { type ModuleNamespace } from "../../util/types.ts";
 import { createTempDir, expect, test } from "../helpers.ts";
 
 test("accept-simple", async () => {

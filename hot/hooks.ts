@@ -1,12 +1,41 @@
-import { registerHooks, type RegisterHooksOptions, type ResolveFnOutput } from "node:module";
+import {
+  type ModuleSource,
+  registerHooks,
+  type RegisterHooksOptions,
+  type ResolveFnOutput,
+} from "node:module";
+import { type Node as OxcNode, parseSync, visitorKeys, type VisitorObject } from "oxc-parser";
 import { isObjectWith } from "../util/types.ts";
 import { urlSplitSearch } from "../util/urls.ts";
 import { ensureModuleInfo, getModuleInfo } from "./state.ts";
+import { fileURLToPath } from "node:url";
+import MagicString from "magic-string";
 
 // Ignore everything in the candle/hot directory.
 const IGNORE_URL_PREFIX = import.meta.url.replace(/\/[^/]*$/, "/");
 
 const TS_PARAM = "ts";
+
+function sourceAsString(source: ModuleSource): string {
+  if (typeof source !== "string") {
+    source = new TextDecoder().decode(source);
+  }
+  return source;
+}
+
+function traverse(node: OxcNode, visitor: VisitorObject) {
+  Reflect.get(visitor, node.type)?.(node);
+  for (const key of visitorKeys[node.type] ?? []) {
+    let children = Reflect.get(node, key) ?? [];
+    if (!Array.isArray(children)) {
+      children = [children];
+    }
+    for (const child of children) {
+      traverse(child, visitor);
+    }
+  }
+  Reflect.get(visitor, `${node.type}:exit`)?.(node);
+}
 
 const hotHooks: RegisterHooksOptions = {
   resolve(specifier, context, next) {
@@ -54,6 +83,55 @@ const hotHooks: RegisterHooksOptions = {
     }
 
     return resolved;
+  },
+  load(url, context, next) {
+    const loaded = next(url, context);
+
+    if ((loaded.format === "module" || loaded.format === "module-typescript") && loaded.source) {
+      const filename = fileURLToPath(url);
+      const source = sourceAsString(loaded.source);
+
+      const parsed = parseSync(filename, source);
+      if (parsed.errors.length) {
+        throw new Error(`Failed to parse ${filename}`, { cause: parsed.errors });
+      }
+
+      const createHotId = "__candle_createHot";
+      const importFrom = JSON.stringify(import.meta.resolve("./index.ts"));
+
+      let magic = new MagicString(source, { filename });
+      let haveInit = false;
+      for (const outer of parsed.program.body) {
+        traverse(outer, {
+          MetaProperty(node) {
+            if (
+              node.meta.type === "Identifier" &&
+              node.meta.name === "import" &&
+              node.property.type === "Identifier" &&
+              node.property.name === "meta"
+            ) {
+              if (!haveInit) {
+                haveInit = true;
+                magic = magic.prependRight(
+                  outer.start,
+                  `import.meta.hot = ${createHotId}(import.meta);\n`,
+                );
+              }
+            }
+          },
+        });
+      }
+
+      if (magic.hasChanged()) {
+        magic = magic.prepend(`import { createHot as ${createHotId} } from ${importFrom};\n`);
+        return {
+          format: loaded.format,
+          source: magic.toString() + `\n//# sourceMappingURL=` + magic.generateMap().toUrl(),
+        };
+      }
+    }
+
+    return loaded;
   },
 };
 
