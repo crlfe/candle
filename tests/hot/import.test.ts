@@ -1,6 +1,8 @@
-import { createHot, hotAllowShutdown } from "candle/hot";
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
+
+import { createHot, hotAllowShutdown } from "candle/hot";
+
 import { createTempDir, expect, test } from "../helpers.ts";
 
 test("import-simple", async () => {

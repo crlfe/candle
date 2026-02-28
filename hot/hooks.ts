@@ -4,12 +4,13 @@ import {
   type RegisterHooksOptions,
   type ResolveFnOutput,
 } from "node:module";
-import { type Node as OxcNode, parseSync, visitorKeys, type VisitorObject } from "oxc-parser";
-import { isObjectWith } from "../util/types.ts";
-import { urlSplit } from "../util/urls.ts";
-import { ensureModuleInfo, getModuleInfo } from "./state.ts";
 import { fileURLToPath } from "node:url";
+
+import { isObjectWith, urlSplit } from "candle/util";
 import MagicString from "magic-string";
+import { type Node as OxcNode, parseSync, visitorKeys, type VisitorObject } from "oxc-parser";
+
+import { ensureModuleInfo, getModuleInfo } from "./state.ts";
 
 // Ignore everything in the candle/hot directory.
 const IGNORE_URL_PREFIX = import.meta.url.replace(/\/[^/]*$/, "/");

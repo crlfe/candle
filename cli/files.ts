@@ -1,6 +1,7 @@
 import NodeFS from "node:fs";
 import NodePath from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { isObjectWith } from "../util/types.ts";
 
 const INPUT_SUFFIXES = [".js", ".jsx", ".ts", ".tsx", ".json"];

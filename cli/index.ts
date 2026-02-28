@@ -2,6 +2,7 @@
 
 import { fork } from "node:child_process";
 import { fileURLToPath } from "node:url";
+
 import {
   CANDLE_BUILD_USAGE,
   CANDLE_HELP_FOOTER,

@@ -1,7 +1,8 @@
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { isObjectWith, type ModuleNamespace } from "../util/types.ts";
+
+import { isObjectWith, type ModuleNamespace } from "candle/util";
 
 export type ModuleAcceptor = [string, (mod: ModuleNamespace | undefined) => void | Promise<void>];
 

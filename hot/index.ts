@@ -1,7 +1,9 @@
+import { type ModuleNamespace } from "candle/util";
+
 import { ensureHotHooksRegistered } from "./hooks.ts";
 import { ensureModuleInfo } from "./state.ts";
+
 export { hotAllowShutdown } from "./state.ts";
-import { type ModuleNamespace } from "../util/types.ts";
 
 declare global {
   interface ImportMeta {

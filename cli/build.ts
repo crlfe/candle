@@ -1,4 +1,5 @@
 import * as NodeUtil from "node:util";
+
 import { findInputFile } from "./files.ts";
 import { CANDLE_BUILD_USAGE, CANDLE_HELP_FOOTER, CANDLE_VERSION } from "./usage.ts";
 
