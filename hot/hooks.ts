@@ -6,7 +6,7 @@ import {
 } from "node:module";
 import { type Node as OxcNode, parseSync, visitorKeys, type VisitorObject } from "oxc-parser";
 import { isObjectWith } from "../util/types.ts";
-import { urlSplitSearch } from "../util/urls.ts";
+import { urlSplit } from "../util/urls.ts";
 import { ensureModuleInfo, getModuleInfo } from "./state.ts";
 import { fileURLToPath } from "node:url";
 import MagicString from "magic-string";
@@ -63,10 +63,10 @@ const hotHooks: RegisterHooksOptions = {
       }
     }
 
-    const [id, search] = urlSplitSearch(resolved.url);
+    const [id, search] = urlSplit(resolved.url);
 
     if (context.parentURL && !context.parentURL.startsWith(IGNORE_URL_PREFIX)) {
-      ensureModuleInfo(id).dependents.add(urlSplitSearch(context.parentURL)[0]);
+      ensureModuleInfo(id).dependents.add(urlSplit(context.parentURL)[0]);
     }
 
     const ts = getModuleInfo(id)?.ts;
