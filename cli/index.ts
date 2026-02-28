@@ -2,17 +2,43 @@
 
 import { fork } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { CANDLE_HELP, CANDLE_VERSION, printUsageError } from "./usage.ts";
+import {
+  CANDLE_BUILD_USAGE,
+  CANDLE_HELP_FOOTER,
+  CANDLE_HELP_HEADER,
+  CANDLE_RUN_USAGE,
+  CANDLE_SERVE_USAGE,
+  CANDLE_VERSION,
+} from "./usage.ts";
 
+const BUILD_PATH = fileURLToPath(import.meta.resolve("./build.ts"));
+const SERVE_PATH = fileURLToPath(import.meta.resolve("./serve.ts"));
 const HOT_PATH = fileURLToPath(import.meta.resolve("../hot/register.ts"));
+
+if (import.meta.main) {
+  main(process.argv.slice(2));
+}
 
 export function main(args: string[]): void {
   if (args[0] === "--help") {
-    process.stderr.write(CANDLE_HELP);
+    process.stderr.write(
+      [
+        CANDLE_HELP_HEADER,
+        CANDLE_SERVE_USAGE,
+        CANDLE_BUILD_USAGE,
+        CANDLE_RUN_USAGE,
+        CANDLE_HELP_FOOTER,
+      ].join("\n"),
+    );
     process.exitCode = 2;
   } else if (args[0] === "--version") {
     process.stderr.write(CANDLE_VERSION);
     process.exitCode = 2;
+  } else if (args[0] === "build") {
+    // The build process will install hot hooks with '--watch'.
+    forkWithReload(BUILD_PATH, args.slice(1), { registerHotHooks: false });
+  } else if (args[0] === "serve") {
+    forkWithReload(SERVE_PATH, args.slice(1));
   } else if (args[0] === "run") {
     if (args[1]) {
       forkWithReload(args[1], args.slice(2));
@@ -50,6 +76,7 @@ function forkWithReload(
   });
 }
 
-if (import.meta.main) {
-  main(process.argv.slice(2));
+export function printUsageError(...message: string[]): void {
+  process.stderr.write("".concat(...message, `\nTry 'candle --help' for more information.\n`));
+  process.exitCode = 2;
 }
