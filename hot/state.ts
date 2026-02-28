@@ -1,7 +1,7 @@
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
-import { isObjectWith, type ModuleNamespace } from "../util/types.ts";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { isObjectWith, type ModuleNamespace } from "../util/types.ts";
 
 export type ModuleAcceptor = [string, (mod: ModuleNamespace | undefined) => void | Promise<void>];
 
@@ -14,16 +14,15 @@ export interface ModuleInfo {
 const modules = new Map<string, ModuleInfo>();
 const watchers = new Map<string, NodeFS.FSWatcher>();
 
+let unrefWatchers = false;
 let watchChangedModules = new Set<string>();
 const watchChangedModulesTimer = setTimeout(onWatchSettled, 50);
 
-export function resetHot() {
+export function hotAllowShutdown() {
   for (const watcher of watchers.values()) {
-    watcher.close();
+    watcher.unref();
   }
-
-  modules.clear();
-  watchers.clear();
+  unrefWatchers = true;
 }
 
 export function ensureModuleInfo(url: string): ModuleInfo {
@@ -35,10 +34,11 @@ export function ensureModuleInfo(url: string): ModuleInfo {
     if (url.startsWith("file://") && !url.includes("/node_modules/")) {
       const dir = NodePath.dirname(fileURLToPath(url));
       if (!watchers.has(dir)) {
-        watchers.set(
-          dir,
-          NodeFS.watch(dir, (type, name) => onWatchChanged(dir, type, name)),
-        );
+        const watcher = NodeFS.watch(dir, (type, name) => onWatchChanged(dir, type, name));
+        if (unrefWatchers) {
+          watcher.unref();
+        }
+        watchers.set(dir, watcher);
       }
     }
   }

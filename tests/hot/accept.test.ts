@@ -1,4 +1,5 @@
-import { createHot, resetHot } from "candle/hot";
+import { createHot, hotAllowShutdown } from "candle/hot";
+import { type ModuleNamespace } from "candle/util";
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
 import { createTempDir, expect, test } from "../helpers.ts";
@@ -28,5 +29,5 @@ test("accept-simple", async () => {
   expect(updates).length(1);
   expect(updates[0]).containSubset({ default: 2 });
 
-  resetHot();
+  hotAllowShutdown();
 });

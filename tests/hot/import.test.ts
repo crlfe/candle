@@ -1,4 +1,4 @@
-import { createHot, resetHot } from "candle/hot";
+import { createHot, hotAllowShutdown } from "candle/hot";
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
 import { createTempDir, expect, test } from "../helpers.ts";
@@ -25,7 +25,7 @@ test("import-simple", async () => {
     value: { default: 2 },
   });
 
-  resetHot();
+  hotAllowShutdown();
 });
 
 test("import-first-error", async () => {
@@ -50,7 +50,7 @@ test("import-first-error", async () => {
     value: { default: 1 },
   });
 
-  resetHot();
+  hotAllowShutdown();
 });
 
 test("import-first-missing", async () => {
@@ -73,5 +73,5 @@ test("import-first-missing", async () => {
     value: { default: 1 },
   });
 
-  resetHot();
+  hotAllowShutdown();
 });
