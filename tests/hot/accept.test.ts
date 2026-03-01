@@ -6,30 +6,32 @@ import { type ModuleNamespace } from "candle/util";
 
 import { createTempDir, expect, test } from "../helpers.ts";
 
-test("accept-simple", async () => {
-  await using tempDir = await createTempDir();
-  const tempPath = NodePath.join(tempDir.path, "simple.js");
+test.suite("accept", () => {
+  test("simple", async () => {
+    await using tempDir = await createTempDir();
+    const tempPath = NodePath.join(tempDir.path, "simple.js");
 
-  const hot = createHot(import.meta);
+    const hot = createHot(import.meta);
 
-  await NodeFS.promises.writeFile(tempPath, `export default 1;\n`);
+    await NodeFS.promises.writeFile(tempPath, `export default 1;\n`);
 
-  const imported = await import(tempPath);
+    const imported = await import(tempPath);
 
-  expect(imported).containSubset({ default: 1 });
+    expect(imported).containSubset({ default: 1 });
 
-  const updates: (ModuleNamespace | undefined)[] = [];
-  hot.accept(tempPath, (mod) => {
-    updates.push(mod);
+    const updates: (ModuleNamespace | undefined)[] = [];
+    hot.accept(tempPath, (mod) => {
+      updates.push(mod);
+    });
+
+    expect(updates).length(0);
+
+    await NodeFS.promises.writeFile(tempPath, `export default 2;\n`);
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(updates).length(1);
+    expect(updates[0]).containSubset({ default: 2 });
+
+    hotAllowShutdown();
   });
-
-  expect(updates).length(0);
-
-  await NodeFS.promises.writeFile(tempPath, `export default 2;\n`);
-  await new Promise((resolve) => setTimeout(resolve, 200));
-
-  expect(updates).length(1);
-  expect(updates[0]).containSubset({ default: 2 });
-
-  hotAllowShutdown();
 });

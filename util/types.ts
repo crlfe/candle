@@ -13,6 +13,19 @@ export interface ModuleNamespace {
 }
 
 /**
+ * Assures the type checker that a value is not nullish.
+ *
+ * If the NODE_ENV environment variable is set to "development", this will
+ * throw an exception if the value is actually null or undefined.
+ */
+export function assertNotNull<T>(value: T | null | undefined): T {
+  if (process.env.NODE_ENV === "development" && value == null) {
+    throw new TypeError();
+  }
+  return value as T;
+}
+
+/**
  * Determines whether a target value is a function.
  */
 export function isFunction(target: unknown): target is Function {
