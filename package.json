@@ -18,16 +18,19 @@
   },
   "scripts": {
     "lint": "oxlint && oxfmt --check",
-    "test": "node --test"
+    "test": "node --test",
+    "typedoc": "typedoc"
   },
   "devDependencies": {
     "@types/chai": "^5.2.3",
     "@types/chai-as-promised": "^8.0.2",
+    "@types/mime-types": "^3.0.1",
     "@types/node": "^25.3.0",
     "@types/ws": "^8.18.1",
     "chai": "^6.2.2",
     "chai-as-promised": "^8.0.2",
     "magic-string": "^0.30.21",
+    "mime-types": "^3.0.2",
     "oxc-parser": "^0.115.0",
     "oxfmt": "^0.34.0",
     "oxlint": "^1.49.0",

@@ -20,7 +20,9 @@ declare global {
   }
 }
 
-class HotImpl implements ImportMetaHot {
+export interface CandleHot extends ImportMetaHot {}
+
+class HotImpl implements CandleHot {
   readonly #meta: ImportMeta;
 
   constructor(meta: ImportMeta) {

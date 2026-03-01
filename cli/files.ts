@@ -45,3 +45,47 @@ export async function tryStat(path: string): Promise<NodeFS.Stats | null> {
     throw err;
   });
 }
+
+export async function listFiles(path: string): Promise<string[]> {
+  const dst: string[] = [];
+  const dir = await NodeFS.promises
+    .opendir(path, {
+      recursive: true,
+    })
+    .catch((err) => {
+      if (isObjectWith(err, "code") && err.code === "ENOENT") {
+        return [];
+      }
+      throw err;
+    });
+
+  for await (const entry of dir) {
+    if (entry.isFile()) {
+      dst.push(NodePath.relative(path, NodePath.join(entry.parentPath, entry.name)));
+    }
+  }
+  dst.sort();
+  return dst;
+}
+
+export async function listEmptyDirectories(path: string): Promise<string[]> {
+  const dst: string[] = [];
+  async function visit(curr: string): Promise<boolean> {
+    let empty = true;
+    const entries = await NodeFS.promises.readdir(curr, {
+      withFileTypes: true,
+    });
+    entries.sort((a, b) => cmp(a.name, b.name));
+    for (const entry of entries) {
+      if (!entry.isDirectory() || !(await visit(NodePath.join(entry.parentPath, entry.name)))) {
+        empty = false;
+      }
+    }
+    if (curr !== path && empty) {
+      dst.push(NodePath.relative(path, curr));
+    }
+    return empty;
+  }
+  await visit(path);
+  return dst;
+}

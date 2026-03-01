@@ -37,12 +37,12 @@ export function main(args: string[]): void {
     process.exitCode = 2;
   } else if (args[0] === "build") {
     // The build process will install hot hooks with '--watch'.
-    forkWithReload(BUILD_PATH, args.slice(1), { registerHotHooks: false });
+    forkWithReload(BUILD_PATH, args.slice(1));
   } else if (args[0] === "serve") {
     forkWithReload(SERVE_PATH, args.slice(1));
   } else if (args[0] === "run") {
     if (args[1]) {
-      forkWithReload(args[1], args.slice(2));
+      forkWithReload(args[1], args.slice(2), { registerHotHooks: true });
     } else {
       printUsageError(`candle run requires a MODULE argument`);
     }
@@ -57,7 +57,7 @@ function forkWithReload(
   options?: { registerHotHooks?: boolean } | undefined,
 ): void {
   const execArgv = Array.from(process.execArgv);
-  if (options?.registerHotHooks !== false) {
+  if (options?.registerHotHooks) {
     execArgv.push(`--import=${HOT_PATH}`);
   }
   const proc = fork(module, args, { execArgv });
@@ -77,7 +77,7 @@ function forkWithReload(
   });
 }
 
-export function printUsageError(...message: string[]): void {
+function printUsageError(...message: string[]): void {
   process.stderr.write("".concat(...message, `\nTry 'candle --help' for more information.\n`));
-  process.exitCode = 2;
+  process.exitCode = 1;
 }

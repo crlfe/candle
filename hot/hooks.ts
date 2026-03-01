@@ -25,17 +25,19 @@ function sourceAsString(source: ModuleSource): string {
 }
 
 function traverse(node: OxcNode, visitor: VisitorObject) {
-  Reflect.get(visitor, node.type)?.(node);
-  for (const key of visitorKeys[node.type] ?? []) {
-    let children = Reflect.get(node, key) ?? [];
-    if (!Array.isArray(children)) {
-      children = [children];
+  if (node != null) {
+    Reflect.get(visitor, node.type)?.(node);
+    for (const key of visitorKeys[node.type] ?? []) {
+      let children = Reflect.get(node, key) ?? [];
+      if (!Array.isArray(children)) {
+        children = [children];
+      }
+      for (const child of children) {
+        traverse(child, visitor);
+      }
     }
-    for (const child of children) {
-      traverse(child, visitor);
-    }
+    Reflect.get(visitor, `${node.type}:exit`)?.(node);
   }
-  Reflect.get(visitor, `${node.type}:exit`)?.(node);
 }
 
 const hotHooks: RegisterHooksOptions = {

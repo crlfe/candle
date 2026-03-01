@@ -1,4 +1,9 @@
 /**
+ * Type that can be awaited to produce T.
+ */
+export type MaybeAsync<T> = T | PromiseLike<T>;
+
+/**
  * Type of a generic imported module.
  */
 export interface ModuleNamespace {
