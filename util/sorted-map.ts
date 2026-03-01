@@ -1,4 +1,4 @@
-import { assertNotNull } from "./types.ts";
+import { assertNotNullish } from "./types.ts";
 
 export class SortedMap<K, V> implements Map<K, V> {
   readonly [Symbol.toStringTag] = "SortedMap";
@@ -83,7 +83,7 @@ export class SortedMap<K, V> implements Map<K, V> {
     while (lo < hi) {
       // The right shift truncates, so lo <= i && i < hi.
       const i = (hi + lo) >> 1;
-      const curr = assertNotNull(assertNotNull(this.#entries[i])[0]);
+      const curr = assertNotNullish(assertNotNullish(this.#entries[i])[0]);
       if (curr < key) {
         // lo <= i, so this reduces the range.
         lo = i + 1;

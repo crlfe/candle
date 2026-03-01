@@ -4,6 +4,11 @@
 export type MaybeAsync<T> = T | PromiseLike<T>;
 
 /**
+ * Type that is either null or undefined.
+ */
+export type Nullish = null | undefined;
+
+/**
  * Type of a generic imported module.
  */
 export interface ModuleNamespace {
@@ -12,14 +17,24 @@ export interface ModuleNamespace {
   [key: PropertyKey]: unknown;
 }
 
+export function asArray<T>(value: T | T[] | Nullish): T[] {
+  if (isNullish(value)) {
+    return [];
+  } else if (!Array.isArray(value)) {
+    return [value];
+  } else {
+    return value;
+  }
+}
+
 /**
  * Assures the type checker that a value is not nullish.
  *
  * If the NODE_ENV environment variable is set to "development", this will
  * throw an exception if the value is actually null or undefined.
  */
-export function assertNotNull<T>(value: T | null | undefined): T {
-  if (process.env.NODE_ENV === "development" && value == null) {
+export function assertNotNullish<T>(value: T | Nullish): T {
+  if (process.env.NODE_ENV === "development" && isNullish(value)) {
     throw new TypeError();
   }
   return value as T;
@@ -37,6 +52,13 @@ export function isFunction(target: unknown): target is Function {
  */
 export function isModuleNamespace(value: unknown): value is ModuleNamespace {
   return isObjectWith(value, Symbol.toStringTag) && value[Symbol.toStringTag] === "Module";
+}
+
+/**
+ * Determines whether a target value is nullish (null or undefined).
+ */
+export function isNullish(value: unknown): value is Nullish {
+  return value == null;
 }
 
 /**
