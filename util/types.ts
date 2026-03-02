@@ -8,6 +8,8 @@ export type MaybeAsync<T> = T | PromiseLike<T>;
  */
 export type Nullish = null | undefined;
 
+export type RecursiveRecord<K extends PropertyKey, V> = { [key in K]: V | RecursiveRecord<K, V> };
+
 /**
  * Type of a generic imported module.
  */
