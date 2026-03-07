@@ -8,6 +8,38 @@ because it will likely break in unexpected ways at the worst time. It is
 released mostly so that I have something to point people at when I'm rambling
 about concepts and prototypes.
 
+## Website Dev Server and Builder
+
+Candle loads your source by importing `src/index.tsx` (or `.jsx`, `.ts`, `.js`, etc).
+This module exports an object specifying all your output files and subdirectories.
+
+`candle serve` will let you view your output files at `http://localhost:8000`,
+and automatically reloads the browser when anything changes in your source.
+
+`candle build` will write the output files to `dist` and, with `--watch` can
+wait for changes in the source and quickly update the output.
+
+For a basic example see `examples/web-simple`, which creates HTML and CSS files in two directories.
+
+For usage instructions, install the `candle` package from this repository
+in your project, and use `--help`:
+
+```
+npm i -D github:crlfe/candle
+./node_modules/.bin/candle --help
+```
+
+Rather than running commands manually, you will probably want to add scripts
+to your `package.json` like:
+
+```
+"scripts": {
+  "build": "candle build --delete --verbose",
+  "serve": "candle serve --verbose",
+  "watch": "candle build --delete --verbose --watch",
+}
+```
+
 ## Hot Reloading
 
 Run the example (tested with Node v24.11.0):
