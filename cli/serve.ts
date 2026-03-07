@@ -3,11 +3,12 @@ import * as NodeHttp from "node:http";
 import { fileURLToPath } from "node:url";
 import * as NodeUtil from "node:util";
 
-import { createHot } from "candle/hot";
-import { isObjectWith, type ModuleNamespace } from "candle/util";
 import { WebSocketServer } from "ws";
 
-import { ensureJsxHooksRegistered } from "../jsx/hooks.ts";
+import { createHot } from "#hot";
+import { ensureJsxHooksRegistered } from "#jsx";
+import { isObjectWith, type ModuleNamespace } from "#util";
+
 import { findInputFile } from "./files.ts";
 import { fileContentToBytes, fileContentToString, getContent } from "./tree.ts";
 import { CANDLE_HELP_FOOTER, CANDLE_SERVE_USAGE, CANDLE_VERSION } from "./usage.ts";

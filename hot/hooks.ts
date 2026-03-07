@@ -1,14 +1,17 @@
 import {
+  findPackageJSON,
   type ModuleSource,
   registerHooks,
   type RegisterHooksOptions,
   type ResolveFnOutput,
 } from "node:module";
-import { fileURLToPath } from "node:url";
+import * as NodePath from "node:path";
+import { fileURLToPath, URLSearchParams } from "node:url";
 
-import { isObjectWith, urlSplit } from "candle/util";
 import MagicString from "magic-string";
 import { type Node as OxcNode, parseSync, visitorKeys, type VisitorObject } from "oxc-parser";
+
+import { assertNotNullish, isObjectWith, urlSplit } from "#util";
 
 import { ensureModuleInfo, getModuleInfo } from "./state.ts";
 
@@ -100,7 +103,12 @@ const hotHooks: RegisterHooksOptions = {
       }
 
       const createHotId = "__candle_createHot";
-      const importFrom = JSON.stringify(import.meta.resolve("./index.ts"));
+
+      const importFrom = JSON.stringify(
+        urlSplit(import.meta.url)[0].endsWith(".ts")
+          ? import.meta.resolve("#hot")
+          : NodePath.join(assertNotNullish(findPackageJSON(import.meta.url)), "../dist/hot.js"),
+      );
 
       let magic = new MagicString(source, { filename });
       let haveInit = false;

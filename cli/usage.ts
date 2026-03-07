@@ -12,6 +12,8 @@ candle build [--output=OUT] [--delete] [--watch] [IN]
 
   -o, --output=OUT    The destination directory (default "./dist")
   -d, --delete        Delete old files in the destination directory
+  -j, --jsx=IMPORT    Module containing the jsx runtime used for static
+                      pages (default "candle/jsx"), specify "" to disable
   -v, --verbose       Print extra information about the build
   -w, --watch         Keep running and update when the input changes
 `;
@@ -24,8 +26,8 @@ candle serve [--host=HOST] [--port=PORT] [IN]
 
   -h, --host=HOST     Local server address (default "localhost")
   -p, --port=8000     Local server port (default 8000)
-  -j, --jsx=IMPORT    Module containing the jsx runtime used on the server
-                      (default "candle/jsx"), specify "" to disable
+  -j, --jsx=IMPORT    Module containing the jsx runtime used for static
+                      pages (default "candle/jsx"), specify "" to disable
   -v, --verbose       Print information about requests
 `;
 

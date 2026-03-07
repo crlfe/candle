@@ -1,4 +1,4 @@
-import { assertNotNullish, PathTree } from "candle/util";
+import { assertNotNullish, PathTree } from "#util";
 
 import { expect, test } from "../helpers.ts";
 

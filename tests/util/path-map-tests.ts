@@ -1,4 +1,4 @@
-import { PathMap } from "candle/util";
+import { PathMap } from "#util";
 
 import { expect, test } from "../helpers.ts";
 

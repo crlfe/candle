@@ -1,4 +1,4 @@
-import { SortedMap } from "candle/util";
+import { SortedMap } from "#util";
 
 import { expect, test } from "../helpers.ts";
 

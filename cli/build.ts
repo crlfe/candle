@@ -2,8 +2,9 @@ import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
 import * as NodeUtil from "node:util";
 
-import { createHot, type CandleHot } from "candle/hot";
-import { isObjectWithValue, type MaybeAsync, type ModuleNamespace } from "candle/util";
+import { createHot, type CandleHot } from "#hot";
+import { ensureJsxHooksRegistered } from "#jsx";
+import { isObjectWithValue, type MaybeAsync, type ModuleNamespace } from "#util";
 
 import { findInputFile, listEmptyDirectories, listFiles, tryStat } from "./files.ts";
 import { iterContent } from "./tree.ts";
@@ -22,6 +23,7 @@ export async function main(args: string[]) {
 
       output: { short: "o", type: "string", default: "./dist" },
       delete: { short: "d", type: "boolean", default: false },
+      jsx: { short: "j", type: "string", default: "candle/jsx" },
       verbose: { short: "v", type: "boolean", default: false },
       watch: { short: "w", type: "boolean", default: false },
     },
@@ -45,6 +47,7 @@ export async function main(args: string[]) {
       input,
       output: values.output,
       deleteFiles: values.delete,
+      jsx: values.jsx,
       verbose: values.verbose,
       watch: values.watch,
     });
@@ -55,10 +58,15 @@ async function run(options: {
   input: string;
   output: string;
   deleteFiles: boolean;
+  jsx: string;
   verbose: boolean;
   watch: boolean;
 }) {
   const { input, output, deleteFiles, verbose, watch } = options;
+
+  if (options.jsx) {
+    ensureJsxHooksRegistered({ jsxImportSource: options.jsx });
+  }
 
   let hot: CandleHot | undefined;
   if (watch) {

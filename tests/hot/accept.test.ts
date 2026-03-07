@@ -1,8 +1,8 @@
 import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
 
-import { createHot, hotAllowShutdown } from "candle/hot";
-import { type ModuleNamespace } from "candle/util";
+import { createHot, hotAllowShutdown } from "#hot";
+import { type ModuleNamespace } from "#util";
 
 import { createTempDir, expect, test } from "../helpers.ts";
 

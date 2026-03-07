@@ -2,7 +2,7 @@ import NodeFS from "node:fs";
 import NodePath from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { isObjectWith } from "../util/types.ts";
+import { isObjectWith } from "#util";
 
 const INPUT_SUFFIXES = [".js", ".jsx", ".ts", ".tsx", ".json"];
 
@@ -88,4 +88,10 @@ export async function listEmptyDirectories(path: string): Promise<string[]> {
   }
   await visit(path);
   return dst;
+}
+
+function cmp<T>(a: T, b: T): number {
+  if (a < b) return -1;
+  if (a > b) return +1;
+  return 0;
 }

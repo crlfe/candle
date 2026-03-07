@@ -1,8 +1,9 @@
 import * as NodePath from "node:path";
 
-import { isVNode, jsxToHtml, jsxToXml } from "candle/jsx";
-import { isFunction, isModuleNamespace, isObjectWith, isPromiseLike, urlSplit } from "candle/util";
 import { lookup } from "mime-types";
+
+import { isVNode, jsxToHtml, jsxToXml } from "#jsx";
+import { isFunction, isModuleNamespace, isObjectWith, isPromiseLike, urlSplit } from "#util";
 
 export type FileContent = string | Uint8Array;
 
@@ -108,6 +109,14 @@ export async function* iterContent(
 
   if (curr == null) {
     return;
+  }
+
+  if (isVNode(curr)) {
+    if (prefix.endsWith(".html")) {
+      curr = jsxToHtml(curr);
+    } else {
+      curr = jsxToXml(curr);
+    }
   }
 
   if (isFileContent(curr)) {
