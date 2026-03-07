@@ -30,6 +30,13 @@
     "test": "node --test",
     "typedoc": "typedoc"
   },
+  "dependencies": {
+    "magic-string": "^0.30.21",
+    "mime-types": "^3.0.2",
+    "oxc-parser": "^0.115.0",
+    "oxc-transform": "^0.116.0",
+    "ws": "^8.19.0"
+  },
   "devDependencies": {
     "@types/chai": "^5.2.3",
     "@types/chai-as-promised": "^8.0.2",
@@ -38,13 +45,8 @@
     "@types/ws": "^8.18.1",
     "chai": "^6.2.2",
     "chai-as-promised": "^8.0.2",
-    "magic-string": "^0.30.21",
-    "mime-types": "^3.0.2",
-    "oxc-parser": "^0.115.0",
-    "oxc-transform": "^0.116.0",
     "oxfmt": "^0.34.0",
-    "oxlint": "^1.49.0",
-    "ws": "^8.19.0"
+    "oxlint": "^1.49.0"
   },
   "packageManager": "pnpm@10.30.1",
   "minimumReleaseAge": 10080
