@@ -12,10 +12,11 @@ import { type Node as OxcNode, parseSync, visitorKeys, type VisitorObject } from
 
 import { ensureModuleInfo, getModuleInfo } from "./state.ts";
 
-// Ignore everything in the candle/hot directory.
+// Ignore everything in this directory, so we can resolve/import user code
+// without creating more dependencies.
 const IGNORE_URL_PREFIX = import.meta.url.replace(/\/[^/]*$/, "/");
 
-const TS_PARAM = "ts";
+const TIMESTAMP_PARAM = "ts";
 
 function sourceAsString(source: ModuleSource): string {
   if (typeof source !== "string") {
@@ -42,12 +43,6 @@ function traverse(node: OxcNode, visitor: VisitorObject) {
 
 const hotHooks: RegisterHooksOptions = {
   resolve(specifier, context, next) {
-    if (!/^file:\/\/|^\.{0,2}(?:[/\\]|$)|/.test(specifier)) {
-      // Ignore anything that does not look like a local file url/path.
-      // TODO: Consider watching files in node_modules, especially if linked.
-      return next(specifier, context);
-    }
-
     let resolved: ResolveFnOutput;
     try {
       resolved = next(specifier, context);
@@ -66,18 +61,23 @@ const hotHooks: RegisterHooksOptions = {
       }
     }
 
+    if (!resolved.url.startsWith("file://")) {
+      // Ignore anything that does not resolve to a local file URL.
+      return resolved;
+    }
+
     const [id, search] = urlSplit(resolved.url);
 
     if (context.parentURL && !context.parentURL.startsWith(IGNORE_URL_PREFIX)) {
       ensureModuleInfo(id).dependents.add(urlSplit(context.parentURL)[0]);
     }
 
-    const ts = getModuleInfo(id)?.ts;
+    const timestamp = getModuleInfo(id)?.ts;
     const searchParams = new URLSearchParams(search);
-    if (ts != null) {
-      searchParams.set(TS_PARAM, ts.toString());
+    if (timestamp != null) {
+      searchParams.set(TIMESTAMP_PARAM, timestamp.toString());
     } else {
-      searchParams.delete(TS_PARAM);
+      searchParams.delete(TIMESTAMP_PARAM);
     }
 
     resolved.url = id;

@@ -1,7 +1,7 @@
 import { type ModuleNamespace } from "candle/util";
 
 import { ensureHotHooksRegistered } from "./hooks.ts";
-import { ensureModuleInfo } from "./state.ts";
+import { ensureModuleInfo, invalidateModule } from "./state.ts";
 
 export { hotAllowShutdown } from "./state.ts";
 
@@ -17,6 +17,8 @@ declare global {
     ): void;
 
     import(specifier: string): AsyncIterableIterator<ModuleNamespace | undefined> & Disposable;
+
+    invalidate(specifier: string): void;
   }
 }
 
@@ -84,6 +86,11 @@ class HotImpl implements CandleHot {
         promise = nextUpdate.promise;
       },
     };
+  }
+
+  invalidate(specifier: string): void {
+    const resolved = this.#meta.resolve(specifier);
+    invalidateModule(resolved);
   }
 }
 

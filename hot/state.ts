@@ -54,10 +54,14 @@ function onWatchChanged(dir: string, type: string, name: string | null): void {
   if (name) {
     const url = pathToFileURL(NodePath.resolve(dir, name)).href;
     if (modules.has(url)) {
-      watchChangedModules.add(url);
-      watchChangedModulesTimer.refresh();
+      invalidateModule(url);
     }
   }
+}
+
+export function invalidateModule(url: string): void {
+  watchChangedModules.add(url);
+  watchChangedModulesTimer.refresh();
 }
 
 async function onWatchSettled() {
