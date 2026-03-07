@@ -1,4 +1,4 @@
-import { type ModuleNamespace } from "candle/util";
+import { type ModuleNamespace } from "#util";
 
 import { ensureHotHooksRegistered } from "./hooks.ts";
 import { ensureModuleInfo, invalidateModule } from "./state.ts";

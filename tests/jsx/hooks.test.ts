@@ -1,10 +1,10 @@
-import { ensureJsxHooksRegistered, isVNode, jsxToHtml } from "candle/jsx";
+import { ensureJsxHooksRegistered, isVNode, jsxToHtml } from "#jsx";
 
 import { expect, test } from "../helpers.ts";
 
 test.suite("jsx hooks", () => {
   test("simple", async () => {
-    ensureJsxHooksRegistered({ jsxImportSource: "candle/jsx" });
+    ensureJsxHooksRegistered({ jsxImportSource: "candle" });
 
     const example = (await import("./example.tsx")).default();
 

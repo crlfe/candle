@@ -1,4 +1,4 @@
-import { createHot, hotAllowShutdown } from "candle/hot";
+import { createHot, hotAllowShutdown } from "#hot";
 
 import { expect, test } from "../helpers.ts";
 

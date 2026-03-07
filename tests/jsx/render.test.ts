@@ -1,4 +1,4 @@
-import { jsx, jsxToHtml, jsxToXml } from "candle/jsx";
+import { jsx, jsxToHtml, jsxToXml } from "#jsx";
 
 import { expect, test } from "../helpers.ts";
 

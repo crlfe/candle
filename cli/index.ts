@@ -3,6 +3,8 @@
 import { fork } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { urlSplit } from "#util";
+
 import {
   CANDLE_BUILD_USAGE,
   CANDLE_HELP_FOOTER,
@@ -12,9 +14,12 @@ import {
   CANDLE_VERSION,
 } from "./usage.ts";
 
-const BUILD_PATH = fileURLToPath(import.meta.resolve("./build.ts"));
-const SERVE_PATH = fileURLToPath(import.meta.resolve("./serve.ts"));
-const HOT_PATH = fileURLToPath(import.meta.resolve("../hot/register.ts"));
+const IS_SOURCE = urlSplit(import.meta.url)[0].endsWith(".ts");
+const BUILD_PATH = fileURLToPath(import.meta.resolve(IS_SOURCE ? "./build.ts" : "./cli-build.js"));
+const SERVE_PATH = fileURLToPath(import.meta.resolve(IS_SOURCE ? "./serve.ts" : "./cli-serve.js"));
+const HOT_PATH = fileURLToPath(
+  import.meta.resolve(IS_SOURCE ? "../hot/register.ts" : "./hot-register.js"),
+);
 
 if (import.meta.main) {
   main(process.argv.slice(2));
@@ -46,6 +51,8 @@ export function main(args: string[]): void {
     } else {
       printUsageError(`candle run requires a MODULE argument`);
     }
+  } else if (args[0]) {
+    printUsageError(`Unknown command ${JSON.stringify(args[0])}`);
   } else {
     printUsageError(`candle requires a COMMAND argument`);
   }

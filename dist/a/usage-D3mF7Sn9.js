@@ -1,10 +1,9 @@
-import packageJson from "../package.json" with { type: "json" };
-
-export const CANDLE_VERSION = `candle ${packageJson.version}\n`;
-export const CANDLE_HELP_HEADER = `Usage: candle [--help] [--version] COMMAND [ARGS...]\n`;
-export const CANDLE_HELP_FOOTER = `For more information, visit <https://github.com/crlfe/candle>.\n`;
-
-export const CANDLE_BUILD_USAGE = `\
+//#endregion
+//#region cli/usage.ts
+const CANDLE_VERSION = `candle 0.1.0\n`;
+const CANDLE_HELP_HEADER = `Usage: candle [--help] [--version] COMMAND [ARGS...]\n`;
+const CANDLE_HELP_FOOTER = `For more information, visit <https://github.com/crlfe/candle>.\n`;
+const CANDLE_BUILD_USAGE = `\
 candle build [--output=OUT] [--delete] [--watch] [IN]
   Write a file tree exported by IN (default "src"). Will search common
   code suffixes and "index" if given a directory. With '--watch', the
@@ -17,8 +16,7 @@ candle build [--output=OUT] [--delete] [--watch] [IN]
   -v, --verbose       Print extra information about the build
   -w, --watch         Keep running and update when the input changes
 `;
-
-export const CANDLE_SERVE_USAGE = `\
+const CANDLE_SERVE_USAGE = `\
 candle serve [--host=HOST] [--port=PORT] [IN]
   Serve a file tree exported by IN (default "src"). Will search common
   code suffixes and "index" if given a directory. The server and browser
@@ -30,9 +28,10 @@ candle serve [--host=HOST] [--port=PORT] [IN]
                       pages (default "candle/jsx"), specify "" to disable
   -v, --verbose       Print information about requests
 `;
-
-export const CANDLE_RUN_USAGE = `\
+const CANDLE_RUN_USAGE = `\
 candle run MODULE [ARGS...]
   Run a user MODULE with the specified arguments. This enhances Node
   with support for automatic reloading via 'import.meta.hot'.
 `;
+//#endregion
+export { CANDLE_SERVE_USAGE as a, CANDLE_RUN_USAGE as i, CANDLE_HELP_FOOTER as n, CANDLE_VERSION as o, CANDLE_HELP_HEADER as r, CANDLE_BUILD_USAGE as t };
