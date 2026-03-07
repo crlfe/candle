@@ -77,18 +77,18 @@ export async function getContent(
     }
   }
 
+  // Ended on something that looks like a directory, so try "index.html".
+  if (segments.at(-1) !== "index.html" && isObjectWith(curr, "index.html")) {
+    segments.push("index.html");
+    curr = await follow(curr["index.html"]);
+  }
+
   if (isVNode(curr)) {
     if (pathname.endsWith(".html")) {
       curr = jsxToHtml(curr);
     } else {
       curr = jsxToXml(curr);
     }
-  }
-
-  // Ended on something that looks like a directory, so try "index.html".
-  if (segments.at(-1) !== "index.html" && isObjectWith(curr, "index.html")) {
-    segments.push("index.html");
-    curr = await follow(curr["index.html"]);
   }
 
   if (!isFileContent(curr)) {

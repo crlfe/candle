@@ -108,12 +108,12 @@ async function getContent(root, url) {
 		curr = void 0;
 		break;
 	}
-	if (isVNode(curr)) if (pathname.endsWith(".html")) curr = jsxToHtml(curr);
-	else curr = jsxToXml(curr);
 	if (segments.at(-1) !== "index.html" && isObjectWith(curr, "index.html")) {
 		segments.push("index.html");
 		curr = await follow(curr["index.html"]);
 	}
+	if (isVNode(curr)) if (pathname.endsWith(".html")) curr = jsxToHtml(curr);
+	else curr = jsxToXml(curr);
 	if (!isFileContent(curr)) return;
 	return {
 		type: guessContentType(segments.at(-1)),

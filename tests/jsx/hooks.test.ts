@@ -4,7 +4,7 @@ import { expect, test } from "../helpers.ts";
 
 test.suite("jsx hooks", () => {
   test("simple", async () => {
-    ensureJsxHooksRegistered({ jsxImportSource: "candle" });
+    ensureJsxHooksRegistered({ jsxImportSource: "candle/jsx" });
 
     const example = (await import("./example.tsx")).default();
 

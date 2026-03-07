@@ -1,6 +1,6 @@
 {
   "name": "candle",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "license": "MIT",
   "bin": "./dist/cli.js",
@@ -34,10 +34,11 @@
     }
   },
   "scripts": {
-    "build": "./cli/index.ts build -dv",
+    "build": "./cli/index.ts build --delete --verbose",
     "lint": "oxlint && oxfmt --check",
+    "serve": "./cli/index.ts serve --verbose",
     "test": "node --test",
-    "typedoc": "typedoc"
+    "watch": "./cli/index.ts build --delete --verbose --watch"
   },
   "dependencies": {
     "magic-string": "^0.30.21",

@@ -1,6 +1,6 @@
 //#endregion
 //#region cli/usage.ts
-const CANDLE_VERSION = `candle 0.1.0\n`;
+const CANDLE_VERSION = `candle 0.1.1\n`;
 const CANDLE_HELP_HEADER = `Usage: candle [--help] [--version] COMMAND [ARGS...]\n`;
 const CANDLE_HELP_FOOTER = `For more information, visit <https://github.com/crlfe/candle>.\n`;
 const CANDLE_BUILD_USAGE = `\

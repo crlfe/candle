@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "candle build --delete --verbose",
+    "serve": "candle serve --verbose",
+    "watch": "candle build --delete --verbose --watch"
+  },
+  "devDependencies": {
+    "candle": "../../"
+  }
+}
