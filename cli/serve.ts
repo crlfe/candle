@@ -7,6 +7,7 @@ import { createHot } from "candle/hot";
 import { isObjectWith, type ModuleNamespace } from "candle/util";
 import { WebSocketServer } from "ws";
 
+import { ensureJsxHooksRegistered } from "../jsx/hooks.ts";
 import { findInputFile } from "./files.ts";
 import { fileContentToBytes, fileContentToString, getContent } from "./tree.ts";
 import { CANDLE_HELP_FOOTER, CANDLE_SERVE_USAGE, CANDLE_VERSION } from "./usage.ts";
@@ -28,6 +29,7 @@ export async function main(args: string[]) {
 
       host: { short: "h", type: "string", default: "localhost" },
       port: { short: "p", type: "string", default: "8000" },
+      jsx: { short: "j", type: "string", default: "candle/jsx" },
       verbose: { short: "v", type: "boolean", default: false },
     },
     allowPositionals: true,
@@ -46,20 +48,30 @@ export async function main(args: string[]) {
       return printUsageError(`Failed to find input file from ${JSON.stringify(inputArg)}.`);
     }
 
-    new Main({ host: values.host, port: values.port, verbose: values.verbose, input }).run();
+    new Main({ ...values, input }).run();
   }
 }
 
 class Main {
-  readonly options: { host: string; port: string; verbose: boolean; input: string };
+  readonly options: { host: string; port: string; jsx: string; verbose: boolean; input: string };
 
   root: ModuleNamespace | undefined;
 
-  constructor(options: { host: string; port: string; verbose: boolean; input: string }) {
+  constructor(options: {
+    host: string;
+    port: string;
+    jsx: string;
+    verbose: boolean;
+    input: string;
+  }) {
     this.options = options;
   }
 
   async run() {
+    if (this.options.jsx) {
+      ensureJsxHooksRegistered({ jsxImportSource: this.options.jsx });
+    }
+
     const server = NodeHttp.createServer(async (req, res) => {
       if (req.method !== "GET" || !req.url) {
         httpWriteError(res, 400);
@@ -177,11 +189,12 @@ class Main {
     }
 
     data = fileContentToBytes(data);
+
     res.setHeader("Content-Type", type);
     res.setHeader("Content-Length", data.byteLength);
     res.end(data);
 
-    this.verboseLogResponse(url, data.byteLength);
+    this.verboseLogResponse(200, url, data.byteLength);
   }
 
   verboseLog(...msg: unknown[]) {
@@ -190,34 +203,34 @@ class Main {
     }
   }
 
-  verboseLogResponse(url: string, length: number) {
+  verboseLogResponse(code: string | number, url: string, contentLength: number) {
     const COLS = 60;
 
     if (this.options.verbose) {
-      let left = `200 ${url}`;
+      let left = `${code} ${url}`;
 
-      let right;
-      let unit;
-      if (length < 5e3) {
-        right = length.toFixed(0);
-        unit = " B";
-      } else if (length < 5e6) {
-        right = (length / 1e3).toFixed(0);
-        unit = " KB";
-      } else {
-        right = (length / 1e6).toFixed(0);
-        unit = " MB";
-      }
+      const [value, unit] = formatContentLength(contentLength);
+      const right = " " + unit.padEnd(3, " ");
 
       // Leave at least two spaces between URL and length.
-      if (left.length + 2 + right.length + unit.length > COLS) {
-        left = left.slice(0, COLS - (left.length + right.length + unit.length) - 5) + "...";
+      if (left.length + 2 + value.length + right.length > COLS) {
+        left = left.slice(0, COLS - (left.length + value.length + right.length) - 5) + "...";
       }
-      left = left.padEnd(COLS - (right.length + unit.length));
+      left = left.padEnd(COLS - (value.length + right.length));
 
-      console.log(`${left}${right}${unit}`);
+      console.log(`${left}${value}${right}`);
+      this.verboseLogResponseTimer.refresh();
+      this.verboseLogResponseTotal += contentLength;
     }
   }
+
+  verboseLogResponseTotal = 0;
+  verboseLogResponseTimer = setTimeout(() => {
+    if (this.verboseLogResponseTotal > 0) {
+      this.verboseLogResponse("===", "group total", this.verboseLogResponseTotal);
+      this.verboseLogResponseTotal = 0;
+    }
+  }, 250);
 }
 
 function httpWriteError(res: NodeHttp.ServerResponse, code: number): void {
@@ -251,9 +264,26 @@ const HTML_ENTITIES: Record<string, string> = {
 function htmlEscape(value: string): string {
   return value.replaceAll(/[&<>"]/g, (m) => HTML_ENTITIES[m] ?? m);
 }
-export function printUsageError(...message: string[]): void {
+
+function printUsageError(...message: string[]): void {
   process.stderr.write(
     "".concat(...message, `\nTry 'candle serve --help' for more information.\n`),
   );
   process.exitCode = 1;
+}
+
+function formatContentLength(length: number): [string, string] {
+  let value;
+  let unit;
+  if (length < 768) {
+    value = length.toFixed(0);
+    unit = "B";
+  } else if (length < 768 * 1024) {
+    value = (length / 1024).toFixed(2);
+    unit = "KiB";
+  } else {
+    value = (length / (1024 * 1024)).toFixed(2);
+    unit = "MiB";
+  }
+  return [value, unit];
 }

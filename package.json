@@ -12,6 +12,15 @@
     "./hot/register": {
       "node": "./hot/register.ts"
     },
+    "./jsx": {
+      "node": "./jsx/index.ts"
+    },
+    "./jsx/jsx-runtime": {
+      "node": "./jsx/jsx-runtime.ts"
+    },
+    "./jsx/register": {
+      "node": "./jsx/register.ts"
+    },
     "./util": {
       "node": "./util/index.ts"
     }
@@ -32,6 +41,7 @@
     "magic-string": "^0.30.21",
     "mime-types": "^3.0.2",
     "oxc-parser": "^0.115.0",
+    "oxc-transform": "^0.116.0",
     "oxfmt": "^0.34.0",
     "oxlint": "^1.49.0",
     "ws": "^8.19.0"

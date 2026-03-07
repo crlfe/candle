@@ -1,5 +1,6 @@
 import * as NodePath from "node:path";
 
+import { isVNode, jsxToHtml, jsxToXml } from "candle/jsx";
 import { isFunction, isModuleNamespace, isObjectWith, isPromiseLike, urlSplit } from "candle/util";
 import { lookup } from "mime-types";
 
@@ -72,6 +73,14 @@ export async function getContent(
       // Otherwise the file was not found.
       curr = undefined;
       break;
+    }
+  }
+
+  if (isVNode(curr)) {
+    if (pathname.endsWith(".html")) {
+      curr = jsxToHtml(curr);
+    } else {
+      curr = jsxToXml(curr);
     }
   }
 

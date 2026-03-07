@@ -24,6 +24,8 @@ candle serve [--host=HOST] [--port=PORT] [IN]
 
   -h, --host=HOST     Local server address (default "localhost")
   -p, --port=8000     Local server port (default 8000)
+  -j, --jsx=IMPORT    Module containing the jsx runtime used on the server
+                      (default "candle/jsx"), specify "" to disable
   -v, --verbose       Print information about requests
 `;
 
